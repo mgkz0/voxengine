@@ -1,3 +1,4 @@
+pub mod app;
 pub mod device;
 pub mod instance;
 pub mod window;
