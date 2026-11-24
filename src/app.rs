@@ -37,3 +37,14 @@ impl ApplicationHandler for App {
         }
     }
 }
+
+impl App {
+    pub fn new(title: String, height: u32, width: u32) -> Self {
+        Self {
+            title,
+            height,
+            width,
+            window: None,
+        }
+    }
+}
