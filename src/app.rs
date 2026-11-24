@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
@@ -10,18 +12,20 @@ pub struct App {
     pub title: String,
     pub height: u32,
     pub width: u32,
-    pub window: Option<Window>,
+    pub window: Option<Arc<Window>>,
 }
 
 impl ApplicationHandler for App {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        let window = event_loop
-            .create_window(
-                Window::default_attributes()
-                    .with_title(self.title.as_str())
-                    .with_inner_size(LogicalSize::new(self.width, self.height)),
-            )
-            .unwrap();
+        let window = Arc::new(
+            event_loop
+                .create_window(
+                    Window::default_attributes()
+                        .with_title(self.title.as_str())
+                        .with_inner_size(LogicalSize::new(self.width, self.height)),
+                )
+                .unwrap(),
+        );
 
         self.window = Some(window);
     }
