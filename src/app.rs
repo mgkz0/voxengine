@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use crate::backend::{GraphicsBackend, vulkan::VulkanBackend};
 use winit::{
     application::ApplicationHandler,
     dpi::LogicalSize,
@@ -13,6 +14,7 @@ pub struct App {
     pub height: u32,
     pub width: u32,
     pub window: Option<Arc<Window>>,
+    pub backend: Box<dyn GraphicsBackend>,
 }
 
 impl ApplicationHandler for App {
@@ -26,7 +28,7 @@ impl ApplicationHandler for App {
                 )
                 .unwrap(),
         );
-
+        self.backend.init_from_runtime(&window);
         self.window = Some(window);
     }
 
@@ -43,12 +45,13 @@ impl ApplicationHandler for App {
 }
 
 impl App {
-    pub fn new(title: String, height: u32, width: u32) -> Self {
+    pub fn new_vulkan(title: String, height: u32, width: u32, backend: VulkanBackend) -> Self {
         Self {
             title,
             height,
             width,
             window: None,
+            backend: Box::new(backend),
         }
     }
 }
