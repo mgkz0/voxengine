@@ -4,15 +4,15 @@ pub mod instance;
 pub mod render_pass;
 pub mod surface;
 pub mod swapchain;
+pub mod vertex;
+pub mod allocator;
+
 
 use crate::backend::{GraphicsBackend, GraphicsError};
 use std::sync::Arc;
+use vulkano::memory::allocator::StandardMemoryAllocator;
 use vulkano::{
-    device::{Device, Queue},
-    image::Image,
-    instance::Instance,
-    render_pass::{Framebuffer, RenderPass},
-    swapchain::{Surface, Swapchain},
+    device::{Device, Queue}, image::Image, instance::Instance, render_pass::{Framebuffer, RenderPass}, swapchain::{Surface, Swapchain},
 };
 use winit::event_loop::EventLoop;
 use winit::window::Window;
@@ -26,6 +26,7 @@ pub struct VulkanBackend {
     swapchain_images: Vec<Arc<Image>>,
     render_pass: Option<Arc<RenderPass>>,
     framebuffers: Vec<Arc<Framebuffer>>,
+    allocator: Option<Arc<StandardMemoryAllocator>>,
 }
 
 impl GraphicsBackend for VulkanBackend {
@@ -51,6 +52,8 @@ impl VulkanBackend {
             swapchain: None,
             swapchain_images: Vec::new(),
             render_pass: None,
+            framebuffers: Vec::new(),
+            allocator: None,
         })
     }
 }

@@ -8,10 +8,7 @@ use crate::backend::vulkan::VulkanBackend;
 impl VulkanBackend {
     pub fn init_framebuffers(&mut self) {
         let render_pass = self.render_pass.as_ref().expect("No render_pass");
-        self.framebuffers = self
-            .swapchain_images
-            .iter()
-            .map(|image| {
+        self.framebuffers = self.swapchain_images.iter().map(|image| {
                 let view = ImageView::new_default(image.clone()).unwrap();
                 Framebuffer::new(
                     render_pass.clone(),
