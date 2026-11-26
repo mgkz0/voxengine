@@ -28,7 +28,7 @@ impl ApplicationHandler for App {
                 )
                 .unwrap(),
         );
-        self.backend.init_from_runtime(&window);
+        self.backend.init_from_runtime(&window).unwrap();
         self.window = Some(window);
     }
 
