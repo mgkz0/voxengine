@@ -1,5 +1,6 @@
 pub mod device;
 pub mod instance;
+pub mod render_pass;
 pub mod surface;
 pub mod swapchain;
 
@@ -9,6 +10,7 @@ use vulkano::{
     device::{Device, Queue},
     image::Image,
     instance::Instance,
+    render_pass::RenderPass,
     swapchain::{Surface, Swapchain},
 };
 use winit::event_loop::EventLoop;
@@ -21,13 +23,16 @@ pub struct VulkanBackend {
     queue: Option<Arc<Queue>>,
     swapchain: Option<Arc<Swapchain>>,
     swapchain_images: Vec<Arc<Image>>,
+    render_pass: Option<Arc<RenderPass>>,
 }
 
 impl GraphicsBackend for VulkanBackend {
     fn init_from_runtime(&mut self, window: &Arc<Window>) -> Result<(), GraphicsError> {
+        //TODO add reasanoble error handle messages
         self.init_surface(window)?;
         self.init_device_with_queue()?;
         self.init_swapchain(window); // TODO add error handling to swapchain initialization
+        self.init_render_pass();
         Ok(())
     }
 }
@@ -42,6 +47,7 @@ impl VulkanBackend {
             queue: None,
             swapchain: None,
             swapchain_images: Vec::new(),
+            render_pass: None,
         })
     }
 }
