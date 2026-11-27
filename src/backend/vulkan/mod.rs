@@ -10,6 +10,7 @@ pub mod vertex;
 
 use crate::backend::{GraphicsBackend, GraphicsError};
 use std::sync::Arc;
+use vulkano::command_buffer::PrimaryAutoCommandBuffer;
 use vulkano::command_buffer::allocator::StandardCommandBufferAllocator;
 use vulkano::memory::allocator::StandardMemoryAllocator;
 use vulkano::{
@@ -33,6 +34,7 @@ pub struct VulkanBackend {
     framebuffers: Vec<Arc<Framebuffer>>,
     mem_allocator: Option<Arc<StandardMemoryAllocator>>,
     cbuffer_allocator: Option<Arc<StandardCommandBufferAllocator>>,
+    command_buffers: Vec<Arc<PrimaryAutoCommandBuffer>>,
 }
 
 impl GraphicsBackend for VulkanBackend {
@@ -44,6 +46,8 @@ impl GraphicsBackend for VulkanBackend {
         self.init_render_pass();
         self.init_framebuffers();
         self.init_allocator();
+        self.init_command_buffer_allocator();
+        self.init_clear_command_buffers();
         Ok(())
     }
 }
@@ -62,6 +66,7 @@ impl VulkanBackend {
             framebuffers: Vec::new(),
             mem_allocator: None,
             cbuffer_allocator: None,
+            command_buffers: Vec::new(),
         })
     }
 }

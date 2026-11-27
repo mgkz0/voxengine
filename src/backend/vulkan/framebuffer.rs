@@ -1,9 +1,15 @@
+use std::sync::Arc;
+
 use vulkano::{
+    command_buffer::{
+        AutoCommandBufferBuilder, CommandBufferUsage, RenderPassBeginInfo, SubpassBeginInfo,
+        SubpassContents, SubpassEndInfo,
+    },
     image::view::ImageView,
     render_pass::{Framebuffer, FramebufferCreateInfo},
 };
 
-use crate::backend::vulkan::VulkanBackend;
+use crate::backend::vulkan::{VulkanBackend, framebuffer};
 
 impl VulkanBackend {
     pub fn init_render_pass(&mut self) {
@@ -31,7 +37,7 @@ impl VulkanBackend {
 
     pub fn init_framebuffers(&mut self) {
         let render_pass = self.render_pass.as_ref().expect("No render_pass");
-        self.framebuffers = self
+        let test = self
             .swapchain_images
             .iter()
             .map(|image| {
@@ -48,5 +54,29 @@ impl VulkanBackend {
             .collect::<Vec<_>>();
     }
 
-    pub fn clear_framebuffer(&self) {}
+    pub fn init_clear_command_buffers(&mut self) {
+        for framebuffer in &self.framebuffers {
+            let mut builder = AutoCommandBufferBuilder::primary(
+                self.cbuffer_allocator.as_ref().unwrap().clone(),
+                self.queue.as_ref().unwrap().queue_family_index(),
+                CommandBufferUsage::OneTimeSubmit,
+            )
+            .unwrap();
+            builder
+                .begin_render_pass(
+                    RenderPassBeginInfo {
+                        clear_values: vec![Some([0.0, 0.0, 1.0, 1.0].into())],
+                        ..RenderPassBeginInfo::framebuffer(framebuffer.clone())
+                    },
+                    SubpassBeginInfo {
+                        contents: SubpassContents::Inline,
+                        ..Default::default()
+                    },
+                )
+                .unwrap()
+                .end_render_pass(SubpassEndInfo::default())
+                .unwrap();
+            self.command_buffers.push(builder.build().unwrap());
+        }
+    }
 }
