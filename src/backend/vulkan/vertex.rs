@@ -1,54 +1,43 @@
-use vulkano::{buffer::BufferContents, pipeline::graphics::vertex_input::Vertex};
 use crate::backend::vulkan::VulkanBackend;
+use vulkano::{
+    buffer::{BufferContents, BufferUsage, Subbuffer},
+    pipeline::graphics::vertex_input::Vertex,
+};
 
-
-#[derive(BufferContents, Vertex)]
+#[derive(BufferContents, Vertex, Clone, Copy)]
 #[repr(C)]
 pub struct V {
-    #[format(R32G32_SFLOAT)]
-    position: [f32; 2],
+    #[format(R32G32B32_SFLOAT)]
+    position: [f32; 3],
 }
-
 
 impl V {
-    pub fn new(x: f32, y: f32) -> Self {
-        Self { position: [x, y] }
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
+        Self {
+            position: [x, y, z],
+        }
     }
 }
 
-mod vs {
-    vulkano_shaders::shader! {
-        ty: "vertex",
-        src: "
-            #version 460
-
-            layout(location = 0) in vec2 position;
-
-            void main() {
-                gl_Position = vec4(position, 0.0, 1.0);
-            }
-        ",
-    }
+pub struct Mesh {
+    pub vertex: Subbuffer<[V]>,
+    pub index: Option<Subbuffer<[u32]>>,
 }
 
-mod fs {
-    vulkano_shaders::shader! {
-        ty: "fragment",
-        src: "
-            #version 460
-
-            layout(location = 0) out vec4 f_color;
-
-            void main() {
-                f_color = vec4(1.0, 0.0, 0.0, 1.0);
-            }
-        ",
+impl Mesh {
+    pub fn new(vertex: Subbuffer<[V]>, index: Option<Subbuffer<[u32]>>) -> Self {
+        Self { vertex, index }
     }
 }
-
 
 impl VulkanBackend {
-    pub fn init_vertex_buffer(&mut self) {
+    pub fn build_mesh(&self, vertices: Vec<V>, indices: Option<Vec<u32>>) -> Mesh {
+        let vertex_buffer = self.build_buffer(vertices, BufferUsage::VERTEX_BUFFER);
+        let index_buffer = match indices {
+            Some(indices) => Some(self.build_buffer(indices, BufferUsage::INDEX_BUFFER)),
+            None => None,
+        };
 
+        Mesh::new(vertex_buffer, index_buffer)
     }
 }

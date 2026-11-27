@@ -1,18 +1,23 @@
+pub mod allocator;
 pub mod device;
 pub mod framebuffer;
 pub mod instance;
-pub mod render_pass;
+pub mod pipeline;
+pub mod shaders;
 pub mod surface;
 pub mod swapchain;
 pub mod vertex;
-pub mod allocator;
-
 
 use crate::backend::{GraphicsBackend, GraphicsError};
 use std::sync::Arc;
+use vulkano::command_buffer::allocator::StandardCommandBufferAllocator;
 use vulkano::memory::allocator::StandardMemoryAllocator;
 use vulkano::{
-    device::{Device, Queue}, image::Image, instance::Instance, render_pass::{Framebuffer, RenderPass}, swapchain::{Surface, Swapchain},
+    device::{Device, Queue},
+    image::Image,
+    instance::Instance,
+    render_pass::{Framebuffer, RenderPass},
+    swapchain::{Surface, Swapchain},
 };
 use winit::event_loop::EventLoop;
 use winit::window::Window;
@@ -26,17 +31,19 @@ pub struct VulkanBackend {
     swapchain_images: Vec<Arc<Image>>,
     render_pass: Option<Arc<RenderPass>>,
     framebuffers: Vec<Arc<Framebuffer>>,
-    allocator: Option<Arc<StandardMemoryAllocator>>,
+    mem_allocator: Option<Arc<StandardMemoryAllocator>>,
+    cbuffer_allocator: Option<Arc<StandardCommandBufferAllocator>>,
 }
 
 impl GraphicsBackend for VulkanBackend {
     fn init_from_runtime(&mut self, window: &Arc<Window>) -> Result<(), GraphicsError> {
-        //TODO add reasanoble error handle messages
+        //TODO add error handling for potential panics
         self.init_surface(window)?;
         self.init_device_with_queue()?;
-        self.init_swapchain(window); // TODO add error handling to swapchain initialization
+        self.init_swapchain(window);
         self.init_render_pass();
         self.init_framebuffers();
+        self.init_allocator();
         Ok(())
     }
 }
@@ -53,7 +60,8 @@ impl VulkanBackend {
             swapchain_images: Vec::new(),
             render_pass: None,
             framebuffers: Vec::new(),
-            allocator: None,
+            mem_allocator: None,
+            cbuffer_allocator: None,
         })
     }
 }
