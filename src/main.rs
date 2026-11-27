@@ -2,6 +2,7 @@ pub mod app;
 pub mod backend;
 
 use crate::{app::App, backend::vulkan::VulkanBackend};
+use vulkano::pipeline::graphics::viewport::Viewport;
 use winit::event_loop::EventLoop;
 
 pub fn main() {
@@ -12,5 +13,6 @@ pub fn main() {
         720,
         VulkanBackend::new(&event_loop).unwrap(),
     );
+
     event_loop.run_app(&mut app).unwrap();
 }

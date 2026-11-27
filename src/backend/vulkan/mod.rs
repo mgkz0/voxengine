@@ -13,6 +13,8 @@ use std::sync::Arc;
 use vulkano::command_buffer::PrimaryAutoCommandBuffer;
 use vulkano::command_buffer::allocator::StandardCommandBufferAllocator;
 use vulkano::memory::allocator::StandardMemoryAllocator;
+use vulkano::pipeline::GraphicsPipeline;
+use vulkano::pipeline::graphics::viewport::Viewport;
 use vulkano::{
     device::{Device, Queue},
     image::Image,
@@ -35,6 +37,8 @@ pub struct VulkanBackend {
     mem_allocator: Option<Arc<StandardMemoryAllocator>>,
     cbuffer_allocator: Option<Arc<StandardCommandBufferAllocator>>,
     command_buffers: Vec<Arc<PrimaryAutoCommandBuffer>>,
+    graphics_pipeline: Option<Arc<GraphicsPipeline>>,
+    viewport: Viewport,
 }
 
 impl GraphicsBackend for VulkanBackend {
@@ -53,8 +57,13 @@ impl GraphicsBackend for VulkanBackend {
 }
 
 impl VulkanBackend {
-    pub fn new(event_loop: &EventLoop<()>) -> Result<Self, GraphicsError> {
+    pub fn new(event_loop: &EventLoop<()>, height: f32, width: f32) -> Result<Self, GraphicsError> {
         let instance = Self::init_instance(event_loop)?;
+        let viewport = Viewport {
+            offset: [0.0, 0.0],
+            extent: [width, height],
+            depth_range: 0.0..=1.0,
+        };
         Ok(Self {
             instance: instance,
             device: None,
@@ -67,6 +76,8 @@ impl VulkanBackend {
             mem_allocator: None,
             cbuffer_allocator: None,
             command_buffers: Vec::new(),
+            graphics_pipeline: None,
+            viewport,
         })
     }
 }

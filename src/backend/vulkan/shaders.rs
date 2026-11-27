@@ -1,4 +1,4 @@
-mod vs {
+pub mod vs {
     vulkano_shaders::shader! {
         ty: "vertex",
         src: "
@@ -13,7 +13,7 @@ mod vs {
     }
 }
 
-mod fs {
+pub mod fs {
     vulkano_shaders::shader! {
         ty: "fragment",
         src: "
